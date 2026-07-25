@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0b12" />
+  <meta name="description" content="Mi seguimiento personal de series y películas" />
+  <title>Maratón — Tu diario de series</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://image.tmdb.org" />
+  <link rel="stylesheet" href="styles.css?v=14" />
+</head>
+<body>
+  <section id="authScreen" class="auth-screen" hidden>
+    <div class="auth-layout">
+      <aside class="auth-promo">
+        <div class="auth-brand"><span class="brand-mark">M</span><b>MARATÓN</b></div>
+        <div class="auth-promo-copy"><p class="eyebrow">Tu tiempo, tus historias</p><h1>Todo lo que ves, en un solo lugar.</h1><p>Organiza tus series, marca episodios, consulta próximos estrenos y descubre tus hábitos.</p><ul><li><span>✓</span> Progreso por temporada y episodio</li><li><span>✓</span> Agenda y estadísticas personales</li><li><span>✓</span> Datos privados y separados por cuenta</li></ul></div>
+        <p class="auth-note">Tu biblioteca pertenece solo a ti.</p>
+      </aside>
+      <form id="authForm" class="auth-card" novalidate>
+        <div class="auth-mobile-brand"><span class="brand-mark">M</span><b>MARATÓN</b></div>
+        <div class="auth-tabs" role="tablist" aria-label="Acceso a la cuenta"><button type="button" data-auth-mode="login" role="tab">Entrar</button><button type="button" data-auth-mode="register" role="tab">Crear cuenta</button></div>
+        <div class="auth-heading"><p class="eyebrow">Tu espacio privado</p><h2 id="authTitle">Crear tu cuenta</h2><p class="muted" id="authHelp">Empieza a construir tu biblioteca personal.</p></div>
+        <label id="nameField">Nombre visible<input name="name" autocomplete="name" maxlength="80" placeholder="¿Cómo quieres que te llamemos?"></label>
+        <label>Nombre de usuario<input name="username" autocomplete="username" required minlength="3" maxlength="30" autocapitalize="none" spellcheck="false" placeholder="tu_usuario"></label>
+        <label>Contraseña<span class="password-control"><input name="password" type="password" minlength="8" maxlength="1024" required autocomplete="new-password" placeholder="Mínimo 8 caracteres"><button type="button" data-action="toggle-password" aria-label="Mostrar contraseña">Ver</button></span></label>
+        <div id="passwordStrength" class="password-strength" hidden><span><i></i></span><small>Usa 8 caracteres o más</small></div>
+        <label id="confirmField">Repite la contraseña<input name="confirmPassword" type="password" minlength="8" maxlength="1024" autocomplete="new-password" placeholder="Escríbela otra vez"></label>
+        <p class="auth-privacy" id="registerPrivacy">Al crear la cuenta aceptas guardar tus datos localmente en este dispositivo.</p>
+        <p class="form-error" id="authError" role="alert"></p>
+        <button class="btn auth-submit" type="submit" id="authSubmit">Crear mi cuenta</button>
+      </form>
+    </div>
+  </section>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand" data-view="home" aria-label="Ir al inicio">
+        <span class="brand-mark">M</span><span>MARATÓN</span>
+      </button>
+      <label class="search">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="search" placeholder="Buscar series o películas" autocomplete="off" />
+        <kbd>⌘ K</kbd>
+      </label>
+      <button class="avatar" data-view="profile" aria-label="Abrir perfil">A</button>
+    </header>
+
+    <main id="app" tabindex="-1"></main>
+
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <button data-view="home" class="active"><span>⌂</span>Para ti</button>
+      <button data-view="calendar"><span>◷</span>Próximos</button>
+      <button data-view="library"><span>▤</span>Biblioteca</button>
+      <button data-view="discover"><span>⌕</span>Descubrir</button>
+      <button data-view="profile"><span>◉</span>Perfil</button>
+    </nav>
+  </div>
+
+  <dialog id="showDialog" class="show-dialog"><div id="dialogContent"></div></dialog>
+  <dialog id="importDialog" class="show-dialog"><div id="importContent"></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js?v=27"></script>
+</body>
+</html>

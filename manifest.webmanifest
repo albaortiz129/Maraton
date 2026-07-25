@@ -1,0 +1,12 @@
+{
+  "name": "Maratón — Diario de series",
+  "short_name": "Maratón",
+  "description": "Tu seguimiento personal de series y películas",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#09090f",
+  "theme_color": "#ff2d74",
+  "icons": [
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}

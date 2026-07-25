@@ -1,0 +1,9 @@
+/data/*.sqlite
+/data/*.sqlite-*
+/data/.secret-key
+/data/sessions/
+/data/backups/
+/data/posters/
+/.env
+/.env.*
+!/.env.example

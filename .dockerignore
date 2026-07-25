@@ -1,0 +1,12 @@
+.git
+.agents
+.codex
+data
+.env
+.env.*
+!.env.example
+README.md
+compose.yaml
+Dockerfile
+docker-compose*.yml
+

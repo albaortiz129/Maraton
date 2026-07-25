@@ -1,0 +1,27 @@
+services:
+  maraton:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: maraton-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4173:80"
+    environment:
+      MARATON_DATA_DIR: /var/lib/maraton
+      MARATON_HTTPS: "0"
+    volumes:
+      - ./data:/var/lib/maraton
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /var/run/apache2:size=8m,mode=755
