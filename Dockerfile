@@ -24,7 +24,7 @@ ENV MARATON_DATA_DIR=/var/lib/maraton \
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD php -r '$c=@file_get_contents("http://127.0.0.1/api.php?action=status"); exit($c===false?1:0);'
+  CMD php -r '$c=@file_get_contents("http://127.0.0.1/api.php?action=health"); exit($c===false?1:0);'
 
 ENTRYPOINT ["maraton-entrypoint"]
 CMD ["apache2-foreground"]

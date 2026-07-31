@@ -1,0 +1,61 @@
+name: maraton-oracle
+
+services:
+  maraton:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      MARATON_DATA_DIR: /var/lib/maraton
+      MARATON_HTTPS: "1"
+      MARATON_TRUST_PROXY: "1"
+      MARATON_ALLOW_REGISTRATION: "0"
+      MARATON_SECRET_KEY: ${MARATON_SECRET_KEY:?Define MARATON_SECRET_KEY in .env.oracle}
+    volumes:
+      - ./data:/var/lib/maraton
+    expose:
+      - "80"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+      - SETGID
+      - SETUID
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /var/run/apache2:size=8m,mode=755
+    networks:
+      - private
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      maraton:
+        condition: service_healthy
+    environment:
+      MARATON_DOMAIN: ${MARATON_DOMAIN:?Define MARATON_DOMAIN in .env.oracle}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - private
+
+networks:
+  private:
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,4 @@
+{$MARATON_DOMAIN} {
+    encode zstd gzip
+    reverse_proxy maraton:80
+}

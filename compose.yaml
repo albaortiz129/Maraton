@@ -10,6 +10,7 @@ services:
     environment:
       MARATON_DATA_DIR: /var/lib/maraton
       MARATON_HTTPS: "0"
+      MARATON_ALLOW_REGISTRATION: "1"
     volumes:
       - ./data:/var/lib/maraton
     security_opt:

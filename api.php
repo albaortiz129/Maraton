@@ -7,15 +7,17 @@ if(!is_dir($dir))mkdir($dir,0775,true);
 $resolvedDir=realpath($dir);
 if($resolvedDir===false||!is_writable($resolvedDir))throw new RuntimeException('El directorio de datos no está disponible');
 $dir=$resolvedDir;
-$sessionDir=$dir.DIRECTORY_SEPARATOR.'sessions';
-if(!is_dir($sessionDir))mkdir($sessionDir,0700,true);
-if(!is_writable($sessionDir))throw new RuntimeException('El directorio de sesiones no está disponible');
-session_save_path($sessionDir);
-
-session_name('maraton_session');
-$https=(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off')||getenv('MARATON_HTTPS')==='1';
-session_set_cookie_params(['httponly'=>true,'samesite'=>'Strict','secure'=>$https,'path'=>'/']);
-session_start();
+$healthRequest=($_GET['action']??'')==='health';
+if(!$healthRequest){
+  $sessionDir=$dir.DIRECTORY_SEPARATOR.'sessions';
+  if(!is_dir($sessionDir))mkdir($sessionDir,0700,true);
+  if(!is_writable($sessionDir))throw new RuntimeException('El directorio de sesiones no está disponible');
+  session_save_path($sessionDir);
+  session_name('maraton_session');
+  $https=(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off')||getenv('MARATON_HTTPS')==='1';
+  session_set_cookie_params(['httponly'=>true,'samesite'=>'Strict','secure'=>$https,'path'=>'/']);
+  session_start();
+}
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
@@ -38,6 +40,7 @@ $db->exec('CREATE TABLE IF NOT EXISTS user_settings(user_id INTEGER PRIMARY KEY,
 
 function out(array $value,int $code=200):never { http_response_code($code);echo json_encode($value,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);exit; }
 function body():array { if((int)($_SERVER['CONTENT_LENGTH']??0)>2097152)out(['error'=>'La solicitud es demasiado grande'],413);$raw=file_get_contents('php://input')?:'{}';if(strlen($raw)>2097152)out(['error'=>'La solicitud es demasiado grande'],413);$value=json_decode($raw,true);if(!is_array($value))out(['error'=>'JSON no válido'],400);return $value; }
+function clientIp():string { $remote=(string)($_SERVER['REMOTE_ADDR']??'local');if(getenv('MARATON_TRUST_PROXY')!=='1')return $remote;$forwarded=trim(explode(',',(string)($_SERVER['HTTP_X_FORWARDED_FOR']??''))[0]);return filter_var($forwarded,FILTER_VALIDATE_IP)!==false?$forwarded:$remote; }
 function userId():int { if(empty($_SESSION['user_id']))out(['error'=>'Debes iniciar sesión'],401);return (int)$_SESSION['user_id']; }
 function cleanUser(array $user):array { return ['id'=>(int)$user['id'],'name'=>$user['name'],'username'=>$user['username']]; }
 function csrfToken():string { if(empty($_SESSION['csrf']))$_SESSION['csrf']=bin2hex(random_bytes(32));return $_SESSION['csrf']; }
@@ -95,22 +98,24 @@ function loadNormalized(PDO $db,int $uid):?array {
 }
 
 $action=$_GET['action']??'data';
+if($action==='health')out(['ok'=>true]);
 if($action==='image'&&$_SERVER['REQUEST_METHOD']==='GET')serveTmdbImage((string)($_GET['path']??''));
 if($action==='status'){
   $count=(int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn();
-  if(empty($_SESSION['user_id']))out(['authenticated'=>false,'hasUsers'=>$count>0,'csrfToken'=>csrfToken()]);
+  $registrationOpen=$count===0||getenv('MARATON_ALLOW_REGISTRATION')==='1';
+  if(empty($_SESSION['user_id']))out(['authenticated'=>false,'hasUsers'=>$count>0,'registrationOpen'=>$registrationOpen,'csrfToken'=>csrfToken()]);
   $query=$db->prepare('SELECT id,name,username FROM users WHERE id=?');$query->execute([$_SESSION['user_id']]);$user=$query->fetch(PDO::FETCH_ASSOC);
-  if(!$user){$_SESSION=[];session_destroy();out(['authenticated'=>false,'hasUsers'=>$count>0],401);}
-  out(['authenticated'=>true,'user'=>cleanUser($user),'csrfToken'=>csrfToken()]);
+  if(!$user){$_SESSION=[];session_destroy();out(['authenticated'=>false,'hasUsers'=>$count>0,'registrationOpen'=>$registrationOpen],401);}
+  out(['authenticated'=>true,'user'=>cleanUser($user),'registrationOpen'=>$registrationOpen,'csrfToken'=>csrfToken()]);
 }
 if($action==='register'&&$_SERVER['REQUEST_METHOD']==='POST'){
-  requireCsrf();$input=body();$name=trim((string)($input['name']??''));$username=trim((string)($input['username']??''));$password=(string)($input['password']??'');
+  requireCsrf();$existingUsers=(int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn();if($existingUsers>0&&getenv('MARATON_ALLOW_REGISTRATION')!=='1')out(['error'=>'El registro de nuevas cuentas está cerrado'],403);$input=body();$name=trim((string)($input['name']??''));$username=trim((string)($input['username']??''));$password=(string)($input['password']??'');
   if(mb_strlen($name)<2||mb_strlen($name)>80||preg_match('/[<>\x00-\x1F\x7F]/u',$name)||!preg_match('/^[a-zA-Z0-9_.-]{3,30}$/',$username)||strlen($password)<8||strlen($password)>1024)out(['error'=>'Revisa el nombre, usuario y contraseña'],422);
   try{$query=$db->prepare('INSERT INTO users(name,username,password,created_at) VALUES(?,?,?,?)');$query->execute([$name,$username,password_hash($password,PASSWORD_DEFAULT),gmdate('c')]);}catch(PDOException){out(['error'=>'Ese nombre de usuario ya existe'],409);}
   $_SESSION['user_id']=(int)$db->lastInsertId();$now=gmdate('c');$query=$db->prepare('INSERT INTO user_profiles(user_id,display_name,bio,avatar_color,updated_at) VALUES(?, ?, "", "#ff2d74", ?)');$query->execute([$_SESSION['user_id'],$name,$now]);$query=$db->prepare('INSERT INTO user_settings(user_id,tmdb_secret,updated_at) VALUES(?,"",?)');$query->execute([$_SESSION['user_id'],$now]);session_regenerate_id(true);out(['ok'=>true,'user'=>['id'=>$_SESSION['user_id'],'name'=>$name,'username'=>$username],'csrfToken'=>csrfToken()]);
 }
 if($action==='login'&&$_SERVER['REQUEST_METHOD']==='POST'){
-  requireCsrf();$input=body();$username=trim((string)($input['username']??''));$key=hash('sha256',($_SERVER['REMOTE_ADDR']??'local').'|'.mb_strtolower($username));checkLoginLimit($db,$key);$query=$db->prepare('SELECT * FROM users WHERE username=?');$query->execute([$username]);$user=$query->fetch(PDO::FETCH_ASSOC);
+  requireCsrf();$input=body();$username=trim((string)($input['username']??''));$key=hash('sha256',clientIp().'|'.mb_strtolower($username));checkLoginLimit($db,$key);$query=$db->prepare('SELECT * FROM users WHERE username=?');$query->execute([$username]);$user=$query->fetch(PDO::FETCH_ASSOC);
   if(!$user||!password_verify((string)($input['password']??''),$user['password'])){recordLoginFailure($db,$key);out(['error'=>'Usuario o contraseña incorrectos'],401);}
   $query=$db->prepare('DELETE FROM login_attempts WHERE client_key=?');$query->execute([$key]);$_SESSION['user_id']=(int)$user['id'];session_regenerate_id(true);out(['ok'=>true,'user'=>cleanUser($user),'csrfToken'=>csrfToken()]);
 }
