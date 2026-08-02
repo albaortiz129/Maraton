@@ -10,6 +10,7 @@ RUN apt-get update \
     && chown -R www-data:www-data /var/lib/maraton
 
 COPY docker/apache-maraton.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/mpm-prefork.conf /etc/apache2/mods-available/mpm_prefork.conf
 COPY docker/entrypoint.sh /usr/local/bin/maraton-entrypoint
 COPY docker/backup.php /usr/local/bin/maraton-backup.php
 RUN sed -i 's/\r$//' /usr/local/bin/maraton-entrypoint \

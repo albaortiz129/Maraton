@@ -8,7 +8,7 @@
   <title>Maratón — Tu diario de series</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://image.tmdb.org" />
-  <link rel="stylesheet" href="styles.css?v=14" />
+  <link rel="stylesheet" href="styles.css?v=15" />
 </head>
 <body>
   <section id="authScreen" class="auth-screen" hidden>
@@ -23,13 +23,16 @@
         <div class="auth-tabs" role="tablist" aria-label="Acceso a la cuenta"><button type="button" data-auth-mode="login" role="tab">Entrar</button><button type="button" data-auth-mode="register" role="tab">Crear cuenta</button></div>
         <div class="auth-heading"><p class="eyebrow">Tu espacio privado</p><h2 id="authTitle">Crear tu cuenta</h2><p class="muted" id="authHelp">Empieza a construir tu biblioteca personal.</p></div>
         <label id="nameField">Nombre visible<input name="name" autocomplete="name" maxlength="80" placeholder="¿Cómo quieres que te llamemos?"></label>
-        <label>Nombre de usuario<input name="username" autocomplete="username" required minlength="3" maxlength="30" autocapitalize="none" spellcheck="false" placeholder="tu_usuario"></label>
-        <label>Contraseña<span class="password-control"><input name="password" type="password" minlength="8" maxlength="1024" required autocomplete="new-password" placeholder="Mínimo 8 caracteres"><button type="button" data-action="toggle-password" aria-label="Mostrar contraseña">Ver</button></span></label>
+        <label id="usernameField">Nombre de usuario<input name="username" autocomplete="username" required minlength="3" maxlength="30" autocapitalize="none" spellcheck="false" placeholder="tu_usuario"></label>
+        <label id="emailField">Correo electrónico<input name="email" type="email" autocomplete="email" maxlength="254" placeholder="tu@correo.com"></label>
+        <label id="recoveryField" hidden>Usuario o correo<input name="identifier" autocomplete="username" maxlength="254" placeholder="tu_usuario o tu@correo.com"></label>
+        <label id="passwordField">Contraseña<span class="password-control"><input name="password" type="password" minlength="8" maxlength="1024" required autocomplete="new-password" placeholder="Mínimo 8 caracteres"><button type="button" data-action="toggle-password" aria-label="Mostrar contraseña">Ver</button></span></label>
         <div id="passwordStrength" class="password-strength" hidden><span><i></i></span><small>Usa 8 caracteres o más</small></div>
         <label id="confirmField">Repite la contraseña<input name="confirmPassword" type="password" minlength="8" maxlength="1024" autocomplete="new-password" placeholder="Escríbela otra vez"></label>
-        <p class="auth-privacy" id="registerPrivacy">Al crear la cuenta aceptas guardar tus datos localmente en este dispositivo.</p>
+        <p class="auth-privacy" id="registerPrivacy">Al crear la cuenta aceptas guardar tus datos de forma privada en el servidor.</p>
         <p class="form-error" id="authError" role="alert"></p>
         <button class="btn auth-submit" type="submit" id="authSubmit">Crear mi cuenta</button>
+        <button class="auth-secondary" type="button" id="authSecondary">He olvidado mi contraseña</button>
       </form>
     </div>
   </section>
@@ -60,6 +63,6 @@
   <dialog id="showDialog" class="show-dialog"><div id="dialogContent"></div></dialog>
   <dialog id="importDialog" class="show-dialog"><div id="importContent"></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=27"></script>
+  <script src="app.js?v=28"></script>
 </body>
 </html>

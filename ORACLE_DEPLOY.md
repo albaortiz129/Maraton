@@ -9,7 +9,7 @@ Esta configuracion usa una maquina Oracle Always Free, Docker y Caddy. Caddy pub
 3. Crea una red con `Start VCN Wizard` y selecciona `Create VCN with Internet Connectivity`.
 4. Crea una instancia de Compute con estas opciones:
    - Nombre: `maraton`
-   - Imagen: Ubuntu
+   - Imagen: Oracle Linux 9 o Ubuntu
    - Shape: `VM.Standard.A1.Flex` marcada como Always Free
    - Recursos recomendados: 1 OCPU y 6 GB de memoria
    - Red publica con una direccion IPv4 publica
@@ -20,7 +20,6 @@ En la Security List o en el Network Security Group permite estas entradas:
 - TCP 22 desde tu propia IP para SSH.
 - TCP 80 desde `0.0.0.0/0` para la validacion y redireccion HTTPS.
 - TCP 443 desde `0.0.0.0/0` para HTTPS.
-- UDP 443 desde `0.0.0.0/0` para HTTP/3. Es opcional.
 
 No abras el puerto 4173 ni el puerto 80 del contenedor de Maraton directamente.
 
@@ -43,7 +42,7 @@ docker compose down
 Sube la carpeta completa. Sustituye la ruta de la clave y la IP:
 
 ```powershell
-scp -i "C:\ruta\oracle-ssh.key" -r "C:\Users\Alba\Documents\GitHub\Maraton" ubuntu@IP_PUBLICA:~/
+scp -i "C:\ruta\oracle-ssh.key" -r "C:\Users\Alba\Documents\GitHub\Maraton" opc@IP_PUBLICA:~/
 ```
 
 La carpeta `data` incluye la cuenta, el progreso, la base SQLite y la clave que cifra el token de TMDB.
@@ -53,7 +52,7 @@ La carpeta `data` incluye la cuenta, el progreso, la base SQLite y la clave que 
 Conecta por SSH:
 
 ```powershell
-ssh -i "C:\ruta\oracle-ssh.key" ubuntu@IP_PUBLICA
+ssh -i "C:\ruta\oracle-ssh.key" opc@IP_PUBLICA
 ```
 
 Dentro de Oracle ejecuta:
@@ -96,13 +95,22 @@ No generes una clave distinta. Una clave diferente impediria descifrar el token 
 chmod 600 .env.oracle
 ```
 
-## 6. Activar el cortafuegos de Ubuntu
+## 6. Activar el cortafuegos del servidor
+
+En Oracle Linux 9:
+
+```bash
+sudo firewall-cmd --permanent --add-service=http
+sudo firewall-cmd --permanent --add-service=https
+sudo firewall-cmd --reload
+```
+
+En Ubuntu:
 
 ```bash
 sudo ufw allow OpenSSH
 sudo ufw allow 80/tcp
 sudo ufw allow 443/tcp
-sudo ufw allow 443/udp
 sudo ufw --force enable
 ```
 
@@ -154,7 +162,7 @@ docker compose --env-file .env.oracle -f compose.oracle.yaml down
 Las copias automaticas dentro de `data/backups` protegen frente a fallos de SQLite, pero siguen estando en el mismo servidor. Descarga periodicamente la carpeta `data` a otro directorio del PC:
 
 ```powershell
-scp -i "C:\ruta\oracle-ssh.key" -r ubuntu@IP_PUBLICA:~/Maraton/data "C:\Copias\Maraton-Oracle"
+scp -i "C:\ruta\oracle-ssh.key" -r opc@IP_PUBLICA:~/Maraton/data "C:\Copias\Maraton-Oracle"
 ```
 
 No ejecutes a la vez la copia local y la copia de Oracle como si fueran la misma aplicacion. Cuando publiques Oracle, utiliza Oracle como version principal.
