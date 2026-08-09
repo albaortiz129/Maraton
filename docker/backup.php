@@ -28,5 +28,5 @@ try {
         }
     }
 } catch (Throwable $error) {
-    fwrite(STDERR, 'No se pudo crear la copia automática: '.$error->getMessage().PHP_EOL);
+    fwrite(STDERR, 'No se pudo crear la copia automatica: '.$error->getMessage().PHP_EOL);
 }
