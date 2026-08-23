@@ -4,7 +4,7 @@ declare(strict_types=1);
 $dataDir = rtrim((string) getenv('MARATON_DATA_DIR'), DIRECTORY_SEPARATOR);
 $database = $dataDir.DIRECTORY_SEPARATOR.'maraton.sqlite';
 if ($dataDir === '' || !is_file($database)) {
-    fwrite(STDERR, "No se encontro la base de datos.\n");
+    fwrite(STDERR, "No se encontró la base de datos.\n");
     exit(1);
 }
 

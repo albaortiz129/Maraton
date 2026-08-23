@@ -1,10 +1,10 @@
 const fs = require('fs');
 
 const source = fs.readFileSync('app.js', 'utf8');
-const names = ['hasContinuousNumbering', 'episodeNumbersForSeason', 'previousEpisodeKeys', 'knownEpisodeCount', 'isFinishedSeries', 'watchedCountForShow', 'showCategory', 'reconcileShowStatus'];
+const names = ['mediaType', 'hasContinuousNumbering', 'episodeNumbersForSeason', 'previousEpisodeKeys', 'knownEpisodeCount', 'isFinishedSeries', 'watchedCountForShow', 'showCategory', 'reconcileShowStatus'];
 const definitions = names.map(name => {
   const match = source.match(new RegExp(`^(?:function ${name}|const ${name}=).*$`, 'm'));
-  if (!match) throw new Error(`No se encontro ${name}`);
+  if (!match) throw new Error(`No se encontró ${name}`);
   return match[0];
 }).join('\n');
 
@@ -30,11 +30,11 @@ const ended = {id: 3, status: 'Ended', seasonMeta: [{number: 1, count: 2}]};
 state.watchedEpisodes['3'] = ['1-1', '1-2'];
 state.showStatus['3'] = 'watching';
 if (!reconcileShowStatus(ended) || state.showStatus['3'] !== 'completed') {
-  throw new Error('No se finalizo automaticamente');
+  throw new Error('No se finalizó automáticamente');
 }
 const renewed = {id: 3, status: 'Returning Series', seasonMeta: [{number: 1, count: 2}, {number: 2, count: 1}]};
 if (!reconcileShowStatus(renewed, {catalogGrew: true}) || state.showStatus['3'] !== 'watching') {
-  throw new Error('No volvio automaticamente a viendo');
+  throw new Error('No volvió automáticamente a viendo');
 }
 const current = {id: 4, status: 'Returning Series', seasonMeta: [{number: 1, count: 2}]};
 state.watchedEpisodes['4'] = ['1-1', '1-2'];
@@ -51,7 +51,7 @@ if (!reconcileShowStatus(unseen) || showCategory(unseen) !== 'watchlist' || !sta
 state.watchedEpisodes['5'] = ['1-1'];
 state.watching['5'] = 1;
 if (!reconcileShowStatus(unseen) || showCategory(unseen) !== 'watching' || state.watchlist.includes(5)) {
-  throw new Error('No se movio automaticamente a viendo');
+  throw new Error('No se movió automáticamente a viendo');
 }
 state.showStatus['5'] = 'dropped';
 if (reconcileShowStatus(unseen) || showCategory(unseen) !== 'dropped' || state.watchedEpisodes['5'].length !== 1) {
@@ -61,7 +61,22 @@ state.showStatus['5'] = 'watching';
 if (reconcileShowStatus(unseen) || showCategory(unseen) !== 'watching' || state.watchedEpisodes['5'].length !== 1) {
   throw new Error('No se pudo retomar la serie');
 }
+const movie = {id: 20000001, contentType: 'movie', episodes: 1};
+state.watching['20000001'] = 0;
+state.showStatus['20000001'] = 'watching';
+if (!reconcileShowStatus(movie) || showCategory(movie) !== 'watchlist') {
+  throw new Error('La película nueva no entró en Ver más tarde');
+}
+state.watching['20000001'] = 1;
+state.watchedEpisodes['20000001'] = ['1-1'];
+if (!reconcileShowStatus(movie) || showCategory(movie) !== 'completed') {
+  throw new Error('La película vista no se marcó como finalizada');
+}
 `;
 
 eval(test);
+const refresh = source.match(/^async function refreshShowMetadata.*$/m)?.[0] || '';
+if (!refresh.includes('changed=tracked?reconcileShowStatus(fresh):false')) {
+  throw new Error('Abrir una ficha sin guardar podria modificar la biblioteca');
+}
 console.log('episode_numbering_tests=ok');

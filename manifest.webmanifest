@@ -1,7 +1,7 @@
 {
-  "name": "Maraton - Diario de series",
-  "short_name": "Maraton",
-  "description": "Tu seguimiento personal de series y peliculas",
+  "name": "Maratón - Diario de series y películas",
+  "short_name": "Maratón",
+  "description": "Tu seguimiento personal de series y películas",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#09090f",

@@ -1,6 +1,6 @@
 # Maratón
 
-Aplicación web local para llevar el seguimiento de series. Incluye cuentas protegidas con contraseña, datos separados por usuario, seguimiento por temporada y episodio, agenda de emisiones de TMDB e importación de TV Time.
+Aplicación web para llevar el seguimiento de series y películas. Incluye cuentas protegidas con contraseña, datos separados por usuario, seguimiento por temporada y episodio, agenda de emisiones de TMDB e importación de TV Time.
 
 ## Ejecutar
 
