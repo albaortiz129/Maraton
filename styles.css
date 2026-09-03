@@ -217,3 +217,27 @@ h1,h2,h3 { text-wrap:balance; }.section-head h1 { font-size:clamp(36px,5vw,60px)
   .metric-card small { font-size:10px; }
   .series-facts { gap:10px; }
 }
+
+.manual-search { display:flex; align-items:center; justify-content:space-between; gap:22px; margin-top:22px; padding:20px 22px; border:1px solid #8d4cff45; border-radius:20px; background:linear-gradient(135deg,#8d4cff13,#ff2d7409); }
+.manual-search p { margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.45; }
+.manual-search .btn { flex:0 0 auto; }
+.manual-title-head { padding:70px 28px 22px; background:radial-gradient(circle at 85% 10%,#8d4cff30,transparent 16rem),linear-gradient(145deg,#201426,#11111a); }
+.manual-title-head h2 { font-size:32px; }
+.manual-title-head > p:last-child { max-width:520px; margin:9px 0 0; color:var(--muted); line-height:1.5; }
+.manual-title-form { display:grid; gap:16px; padding-top:24px; }
+.manual-title-form label,.manual-title-form [data-manual-series-fields] { display:grid; gap:7px; color:#d4d2dc; font-size:13px; font-weight:750; }
+.manual-title-form input,.manual-title-form select,.manual-title-form textarea { width:100%; padding:12px 13px; border:1px solid var(--border); border-radius:12px; outline:0; background:var(--surface-2); color:white; }
+.manual-title-form input,.manual-title-form select { min-height:47px; }
+.manual-title-form textarea { resize:vertical; }
+.manual-title-form input:focus,.manual-title-form select:focus,.manual-title-form textarea:focus { border-color:#ff2d7470; box-shadow:0 0 0 4px #ff2d7412; }
+.manual-title-form small { color:var(--muted); font-weight:500; line-height:1.45; }
+.manual-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+@media (max-width:640px) {
+  .manual-search { align-items:stretch; flex-direction:column; gap:15px; padding:17px; }
+  .manual-search .btn { width:100%; }
+  .manual-title-head { padding:calc(72px + env(safe-area-inset-top)) 18px 21px; }
+  .manual-title-head h2 { font-size:29px; }
+  .manual-title-form { padding-top:20px; }
+  .manual-form-grid { grid-template-columns:1fr; }
+}
