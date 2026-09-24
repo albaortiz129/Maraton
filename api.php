@@ -14,9 +14,19 @@ if(!$healthRequest){
   if(!is_writable($sessionDir))throw new RuntimeException('El directorio de sesiones no está disponible');
   session_save_path($sessionDir);
   session_name('maraton_session');
+  // Keep signed-in devices for 30 days of inactivity, including browser restarts.
+  $sessionLifetime=30*24*60*60;
+  ini_set('session.gc_maxlifetime',(string)$sessionLifetime);
+  ini_set('session.use_strict_mode','1');
+  ini_set('session.use_only_cookies','1');
   $https=(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off')||getenv('MARATON_HTTPS')==='1';
-  session_set_cookie_params(['httponly'=>true,'samesite'=>'Strict','secure'=>$https,'path'=>'/']);
+  session_set_cookie_params(['lifetime'=>$sessionLifetime,'httponly'=>true,'samesite'=>'Strict','secure'=>$https,'path'=>'/']);
   session_start();
+  if(isset($_SESSION['last_activity'])&&time()-(int)$_SESSION['last_activity']>$sessionLifetime){
+    $_SESSION=[];session_regenerate_id(true);
+  }
+  $_SESSION['last_activity']=time();
+  if(!empty($_SESSION['user_id']))setcookie(session_name(),session_id(),['expires'=>time()+$sessionLifetime,'httponly'=>true,'samesite'=>'Strict','secure'=>$https,'path'=>'/']);
 }
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
