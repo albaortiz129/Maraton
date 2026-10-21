@@ -81,6 +81,22 @@ const { chromium } = require('playwright');
     await page.evaluate(()=>{SHOWS=[{id:100,title:'Serie',episodes:10,seasons:1,poster:'icon.svg',backdrop:'icon.svg'}];state.watching={100:1};state.watchlist=[100];render('home')});
     assert.equal(await page.locator('h2').filter({hasText:'Tu lista'}).count(),0);
     assert.deepEqual(await page.evaluate(()=>state.watchlist),[100]);
+    assert.equal(await page.locator('.bottom-nav button').count(),4);
+    assert.equal(await page.locator('.bottom-nav [data-view="library"]').count(),0);
+    await page.evaluate(()=>{
+      SHOWS=Array.from({length:8},(_,i)=>({id:100+i,contentType:'tv',title:'Serie '+i,episodes:2,seasonMeta:[{number:1,count:2}],poster:'icon.svg'}));
+      state.watchlist=[];state.watching={};state.watchedEpisodes={};state.showStatus={};
+      for(const show of SHOWS){state.watching[show.id]=1;state.watchedEpisodes[show.id]=['1-1']}
+      render('profile');
+    });
+    const expand=page.locator('[data-library-open="watching"][data-library-media="tv"]');
+    assert.equal(await page.locator('[data-profile-media="tv"] .poster-card').count(),6);
+    await expand.click();
+    assert.equal(await page.locator('[data-profile-media="tv"] .poster-card').count(),8);
+    assert.equal(await page.evaluate(()=>currentView),'profile');
+    await expand.click();
+    assert.equal(await page.locator('[data-profile-media="tv"] .poster-card').count(),6);
+    assert.equal(await page.getByText('Las estadísticas se calculan con tu actividad guardada.').count(),0);
     console.log('theme_profile_tests=ok: persistence, account isolation, validation, CSRF, failure recovery, profile editor, personal rating, home list removal');
   } finally {
     if(browser)await browser.close();

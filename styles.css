@@ -335,39 +335,43 @@ select:focus-visible { outline-color: var(--accent); }
 /* Modo oscuro por cuenta, con colores planos y fondos menos negros. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #22232b;
-  --surface: #2c2d38;
-  --surface-2: #363743;
-  --text: #f5f2f6;
-  --muted: #c0b9c7;
-  --border: #4e4c5b;
-  --accent: #f18bb0;
-  --accent-soft: #4b3041;
+  --bg: #24282d;
+  --surface: #2e3339;
+  --surface-2: #373d44;
+  --text: #f1f3f5;
+  --muted: #bbc3cd;
+  --border: #4a535e;
+  --accent: #f0a2bb;
+  --accent-soft: #49353f;
   --green: #85d8b1;
   --success-soft: #293f37;
   --shadow: 0 8px 28px #00000018;
 }
 [data-theme="dark"] .auth-promo, [data-theme="dark"] .profile-head,
 [data-theme="dark"] .manual-title-head, [data-theme="dark"] .manual-search,
-[data-theme="dark"] .hero { background-color: #393244; border-color: var(--border); }
+[data-theme="dark"] .hero { background-color: #323c46; border-color: var(--border); }
 [data-theme="dark"] .poster-overlay, [data-theme="dark"] .badge,
 [data-theme="dark"] .dialog-close, [data-theme="dark"] .search:focus-within { background: var(--surface); color: var(--text); }
 [data-theme="dark"] .btn, [data-theme="dark"] .brand-mark { color: #321424; }
 [data-theme="dark"] .btn:hover { background: #f5a5c1; }
 [data-theme="dark"] .btn.secondary, [data-theme="dark"] .episode button,
-[data-theme="dark"] .password-control button { background: #494052; color: #f2e9f6; }
-[data-theme="dark"] .btn.secondary:hover { background: #5a4d66; }
+[data-theme="dark"] .password-control button { background: #424b56; color: #f1f3f5; }
+[data-theme="dark"] .btn.secondary:hover { background: #505c68; }
 [data-theme="dark"] .continue-card:hover, [data-theme="dark"] .day:hover,
-[data-theme="dark"] .bottom-nav button:hover { background: #38333f; border-color: var(--border); }
+[data-theme="dark"] .bottom-nav button:hover { background: #3c444e; border-color: var(--border); }
 [data-theme="dark"] .mark-next:hover { background: #344e42; }
 [data-theme="dark"] .mark-next span, [data-theme="dark"] .episode.watched button { background: var(--green); color: #163326; }
 [data-theme="dark"] .filter-chips button span, [data-theme="dark"] .progress,
-[data-theme="dark"] .password-strength > span { background: #59505f; }
+[data-theme="dark"] .password-strength > span { background: #56616e; }
 [data-theme="dark"] .form-error, [data-theme="dark"] .danger-action,
 [data-theme="dark"] .delete-series, [data-theme="dark"] .stop-tracking { color: #ffa2ba; }
 [data-theme="dark"] .form-error.success { color: var(--green); }
 [data-theme="dark"] .import-item.missing span:last-child { color: #edc17f; }
-[data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: #bdb3c5; }
+[data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: #b7c1ce; }
+[data-theme="dark"] .bottom-nav { background: #2e3339; box-shadow: 0 8px 30px #0003; }
+[data-theme="dark"] .genre-list span { background: #3b4653; color: #d3deec; }
+[data-theme="dark"] .genre-list b { color: #f1f3f5; }
+.bottom-nav { grid-template-columns: repeat(4,minmax(0,1fr)); width: min(580px,calc(100% - 20px)); }
 [data-theme="dark"] .toast { background: #f5f2f6; color: #292733; }
 
 @media (max-width:640px) {
