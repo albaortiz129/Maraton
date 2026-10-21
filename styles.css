@@ -233,6 +233,9 @@ h1,h2,h3 { text-wrap:balance; }.section-head h1 { font-size:clamp(36px,5vw,60px)
 .manual-title-form small { color:var(--muted); font-weight:500; line-height:1.45; }
 .manual-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
+.theme-settings label { display: block; margin: 16px 0 8px; font-weight: 700; }
+.theme-settings select { min-height: 46px; width: min(100%, 300px); padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); color: var(--text); }
+#themeSaveStatus { min-height: 24px; color: var(--muted); font-size: 13px; }
 /* Paleta clara: superficies sólidas, también en móvil y formularios. */
 :root {
   color-scheme: light;
@@ -321,6 +324,44 @@ select:focus-visible { outline-color: var(--accent); }
   .hero-content, .dialog-title { padding: 17px; border-radius: 15px; }
   .poster-overlay { padding: 10px 11px; }
 }
+
+/* Modo oscuro por cuenta, con colores planos y fondos menos negros. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #22232b;
+  --surface: #2c2d38;
+  --surface-2: #363743;
+  --text: #f5f2f6;
+  --muted: #c0b9c7;
+  --border: #4e4c5b;
+  --accent: #f18bb0;
+  --accent-soft: #4b3041;
+  --green: #85d8b1;
+  --success-soft: #293f37;
+  --shadow: 0 8px 28px #00000018;
+}
+[data-theme="dark"] .auth-promo, [data-theme="dark"] .profile-head,
+[data-theme="dark"] .manual-title-head, [data-theme="dark"] .manual-search,
+[data-theme="dark"] .hero { background-color: #393244; border-color: var(--border); }
+[data-theme="dark"] .poster-overlay, [data-theme="dark"] .badge,
+[data-theme="dark"] .dialog-close, [data-theme="dark"] .search:focus-within { background: var(--surface); color: var(--text); }
+[data-theme="dark"] .btn, [data-theme="dark"] .brand-mark { color: #321424; }
+[data-theme="dark"] .btn:hover { background: #f5a5c1; }
+[data-theme="dark"] .btn.secondary, [data-theme="dark"] .episode button,
+[data-theme="dark"] .password-control button { background: #494052; color: #f2e9f6; }
+[data-theme="dark"] .btn.secondary:hover { background: #5a4d66; }
+[data-theme="dark"] .continue-card:hover, [data-theme="dark"] .day:hover,
+[data-theme="dark"] .bottom-nav button:hover { background: #38333f; border-color: var(--border); }
+[data-theme="dark"] .mark-next:hover { background: #344e42; }
+[data-theme="dark"] .mark-next span, [data-theme="dark"] .episode.watched button { background: var(--green); color: #163326; }
+[data-theme="dark"] .filter-chips button span, [data-theme="dark"] .progress,
+[data-theme="dark"] .password-strength > span { background: #59505f; }
+[data-theme="dark"] .form-error, [data-theme="dark"] .danger-action,
+[data-theme="dark"] .delete-series, [data-theme="dark"] .stop-tracking { color: #ffa2ba; }
+[data-theme="dark"] .form-error.success { color: var(--green); }
+[data-theme="dark"] .import-item.missing span:last-child { color: #edc17f; }
+[data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: #bdb3c5; }
+[data-theme="dark"] .toast { background: #f5f2f6; color: #292733; }
 
 @media (max-width:640px) {
   .manual-search { align-items:stretch; flex-direction:column; gap:15px; padding:17px; }

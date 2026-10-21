@@ -48,6 +48,8 @@ $db->exec('CREATE TABLE IF NOT EXISTS watched_episodes(user_id INTEGER NOT NULL,
 $db->exec('CREATE TABLE IF NOT EXISTS watch_history(id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, show_id INTEGER NOT NULL, title TEXT NOT NULL, episode_label TEXT NOT NULL, watched_at TEXT NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)');
 $db->exec('CREATE TABLE IF NOT EXISTS user_settings(user_id INTEGER PRIMARY KEY, tmdb_secret TEXT NOT NULL DEFAULT "", updated_at TEXT NOT NULL, FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE)');
 $userColumns=array_column($db->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_ASSOC),'name');
+$profileColumns=array_column($db->query('PRAGMA table_info(user_profiles)')->fetchAll(PDO::FETCH_ASSOC),'name');
+if(!in_array('theme',$profileColumns,true))$db->exec('ALTER TABLE user_profiles ADD COLUMN theme TEXT NOT NULL DEFAULT "light"');
 if(!in_array('email',$userColumns,true))$db->exec('ALTER TABLE users ADD COLUMN email TEXT');
 if(!in_array('auth_version',$userColumns,true))$db->exec('ALTER TABLE users ADD COLUMN auth_version INTEGER NOT NULL DEFAULT 1');
 $trackingColumns=array_column($db->query('PRAGMA table_info(show_tracking)')->fetchAll(PDO::FETCH_ASSOC),'name');
@@ -113,7 +115,7 @@ function saveNormalized(PDO $db,int $uid,array $input):string {
   }catch(Throwable $error){if($db->inTransaction())$db->rollBack();throw $error;}
 }
 function loadNormalized(PDO $db,int $uid):?array {
-  $q=$db->prepare('SELECT * FROM user_profiles WHERE user_id=?');$q->execute([$uid]);$profile=$q->fetch(PDO::FETCH_ASSOC);if(!$profile)return null;$state=['watching'=>[],'watchlist'=>[],'watched'=>[],'watchedEpisodes'=>[],'showStatus'=>[],'ratings'=>[],'history'=>[],'profile'=>['bio'=>$profile['bio'],'avatarColor'=>$profile['avatar_color']],'name'=>$profile['display_name']];
+  $q=$db->prepare('SELECT * FROM user_profiles WHERE user_id=?');$q->execute([$uid]);$profile=$q->fetch(PDO::FETCH_ASSOC);if(!$profile)return null;$state=['watching'=>[],'watchlist'=>[],'watched'=>[],'watchedEpisodes'=>[],'showStatus'=>[],'ratings'=>[],'history'=>[],'profile'=>['bio'=>$profile['bio'],'avatarColor'=>$profile['avatar_color'],'theme'=>$profile['theme']??'light'],'name'=>$profile['display_name']];
   $q=$db->prepare('SELECT * FROM show_tracking WHERE user_id=?');$q->execute([$uid]);foreach($q->fetchAll(PDO::FETCH_ASSOC) as $row){$id=(string)$row['show_id'];if((int)$row['is_tracking']){$state['watching'][$id]=(int)$row['progress_count'];$state['showStatus'][$id]=$row['status'];}if((int)$row['in_watchlist'])$state['watchlist'][]=(int)$row['show_id'];if($row['rating']!==null)$state['ratings'][$id]=(int)$row['rating'];}
   $q=$db->prepare('SELECT show_id,season,episode FROM watched_episodes WHERE user_id=? ORDER BY season,episode');$q->execute([$uid]);foreach($q->fetchAll(PDO::FETCH_ASSOC) as $row)$state['watchedEpisodes'][(string)$row['show_id']][]=$row['season'].'-'.$row['episode'];
   $q=$db->prepare('SELECT show_id,title,episode_label,watched_at FROM watch_history WHERE user_id=? ORDER BY id DESC LIMIT 200');$q->execute([$uid]);foreach($q->fetchAll(PDO::FETCH_ASSOC) as $row)$state['history'][]=['showId'=>(int)$row['show_id'],'title'=>$row['title'],'episode'=>$row['episode_label'],'at'=>$row['watched_at']];
@@ -186,6 +188,15 @@ if($action==='change_password'&&$_SERVER['REQUEST_METHOD']==='POST'){
     session_regenerate_id(true);$_SESSION['auth_version']=$version;unset($_SESSION['csrf']);
     out(['ok'=>true,'csrfToken'=>csrfToken(),'message'=>'Contraseña actualizada. Se han cerrado las demás sesiones.']);
   }catch(Throwable $error){if($db->inTransaction())$db->rollBack();out(['error'=>'No se pudo cambiar la contraseña. Inténtalo de nuevo.'],500);}
+}
+if($action==='theme'&&$_SERVER['REQUEST_METHOD']==='POST'){
+  requireCsrf();
+  $uid=userId();
+  $theme=body()['theme']??null;
+  if(!in_array($theme,['light','dark'],true))out(['error'=>'Tema no válido'],422);
+  $q=$db->prepare('UPDATE user_profiles SET theme=? WHERE user_id=?');
+  $q->execute([$theme,$uid]);
+  out(['ok'=>true,'theme'=>$theme]);
 }
 if($action==='profile'&&$_SERVER['REQUEST_METHOD']==='POST'){
   requireCsrf();$uid=userId();$input=body();$name=trim((string)($input['name']??''));$email=mb_strtolower(trim((string)($input['email']??'')));$bio=trim((string)($input['bio']??''));$color=(string)($input['avatarColor']??'');if(mb_strlen($name)<2||mb_strlen($name)>80||preg_match('/[<>\x00-\x1F\x7F]/u',$name)||($email!==''&&(strlen($email)>254||!filter_var($email,FILTER_VALIDATE_EMAIL)))||mb_strlen($bio)>240||!preg_match('/^#[0-9a-f]{6}$/i',$color))out(['error'=>'Perfil no válido'],422);$now=gmdate('c');$db->beginTransaction();try{$q=$db->prepare('UPDATE users SET name=?,email=? WHERE id=?');$q->execute([$name,$email===''?null:$email,$uid]);$q=$db->prepare('INSERT INTO user_profiles(user_id,display_name,bio,avatar_color,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET display_name=excluded.display_name,bio=excluded.bio,avatar_color=excluded.avatar_color,updated_at=excluded.updated_at');$q->execute([$uid,$name,$bio,$color,$now]);$db->commit();out(['ok'=>true,'email'=>$email,'savedAt'=>$now]);}catch(PDOException){if($db->inTransaction())$db->rollBack();out(['error'=>'Ese correo ya está asociado a otra cuenta'],409);}catch(Throwable){if($db->inTransaction())$db->rollBack();out(['error'=>'No se pudo guardar el perfil'],500);}

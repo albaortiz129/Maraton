@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const source = fs.readFileSync('app.js', 'utf8');
-const names = ['mediaType', 'hasContinuousNumbering', 'episodeNumbersForSeason', 'previousEpisodeKeys', 'knownEpisodeCount', 'isFinishedSeries', 'watchedCountForShow', 'showCategory', 'reconcileShowStatus'];
+const names = ['mediaType', 'hasContinuousNumbering', 'episodeNumbersForSeason', 'previousEpisodeKeys', 'knownEpisodeCount', 'isFinishedSeries', 'watchedCountForShow', 'onlyUndatedEpisodesRemain', 'showCategory', 'reconcileShowStatus'];
 const definitions = names.map(name => {
   const match = source.match(new RegExp(`^(?:function ${name}|const ${name}=).*$`, 'm'));
   if (!match) throw new Error(`No se encontró ${name}`);
@@ -62,6 +62,21 @@ if (reconcileShowStatus(unseen) || showCategory(unseen) !== 'watching' || state.
   throw new Error('No se pudo retomar la serie');
 }
 const movie = {id: 20000001, contentType: 'movie', episodes: 1};
+const waiting = {id: 6, tmdbId: 66, seasonMeta: [{number:1,count:3}], episodeDates: {'1-1':'2026-01-01','1-2':null,'1-3':null}};
+state.watchedEpisodes[6]=['1-1'];
+if(showCategory(waiting)!=='completed')throw new Error('Los capítulos sin fecha no deberían dejar la serie en viendo');
+waiting.episodeDates['1-3']='2027-01-01';
+if(showCategory(waiting)!=='watching')throw new Error('Una fecha nueva debe reabrir la serie, aunque sea futura');
+delete waiting.episodeDates['1-3'];
+if(showCategory(waiting)!=='watching')throw new Error('No confundir datos sin cargar con capítulos sin fecha');
+waiting.episodeDates['1-3']=null;
+state.showStatus[6]='dropped';
+if(showCategory(waiting)!=='dropped')throw new Error('Debe conservarse Ya no sigo');
+state.showStatus[6]='watching';
+state.watchedEpisodes[6]=[];
+if(showCategory(waiting)!=='watchlist')throw new Error('Debe conservarse Ver más tarde');
+state.watchedEpisodes[6]=['1-1'];
+if(showCategory({...waiting,tmdbId:0,manual:true})!=='watching')throw new Error('No finalizar títulos manuales sin fechas');
 state.watching['20000001'] = 0;
 state.showStatus['20000001'] = 'watching';
 if (!reconcileShowStatus(movie) || showCategory(movie) !== 'watchlist') {
