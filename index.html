@@ -8,7 +8,7 @@
   <title>Maratón — Tu diario de series y películas</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://image.tmdb.org" />
-  <link rel="stylesheet" href="styles.css?v=24" />
+  <link rel="stylesheet" href="styles.css?v=25" />
 </head>
 <body>
   <section id="authScreen" class="auth-screen" hidden>
@@ -42,9 +42,8 @@
         <span class="brand-mark">M</span><span>MARATÓN</span>
       </button>
       <label class="search">
-        <span aria-hidden="true">⌕</span>
-        <input id="searchInput" type="search" placeholder="Buscar series o películas" autocomplete="off" />
-        <kbd>⌘ K</kbd>
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+        <input id="searchInput" type="search" aria-label="Buscar series o películas" placeholder="Buscar series o películas" autocomplete="off" />
       </label>
       <button class="avatar" data-view="profile" aria-label="Abrir perfil">A</button>
     </header>
@@ -63,6 +62,6 @@
   <dialog id="showDialog" class="show-dialog"><div id="dialogContent"></div></dialog>
   <dialog id="importDialog" class="show-dialog"><div id="importContent"></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=52"></script>
+  <script src="app.js?v=53"></script>
 </body>
 </html>

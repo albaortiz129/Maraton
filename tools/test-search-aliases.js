@@ -21,6 +21,7 @@ const calls = [];
 const searchContext = {
   tmdb: async path => {
     calls.push(path);
+    if(path.includes('Hotaru%20no%20Yomeiri'))return {results:[{id:123,name:'Hotaru no Yomeiri'}]};
     if (path.includes('Four%20Hands%2C%20Two%20Sonatas')) {
       return { results: [{ id: 99, media_type: 'tv', name: 'Cuatro manos, dos sonatas' }] };
     }
@@ -41,6 +42,12 @@ vm.runInNewContext(source.slice(start, searchEnd), searchContext);
   if (results[0]?.id !== 99) {
     throw new Error('El resultado del alias internacional no tiene prioridad.');
   }
+  const anime=await searchContext.searchTmdb('la boda de las luciernagas');
+  if(!anime.some(item=>item.id===123))throw new Error('No se consultó el título original del anime');
+  if(!calls.some(path=>path.startsWith('/search/movie?'))||!calls.some(path=>path.startsWith('/search/tv?')))throw new Error('No se consultan ambos catálogos');
+  searchContext.tmdb=async path=>{if(path.startsWith('/search/tv?'))throw new Error('Temporary failure');return {results:[{id:456,title:'Película encontrada'}]}};
+  const partial=await searchContext.searchTmdb('Película encontrada');
+  if(!partial.some(item=>item.id===456))throw new Error('Un fallo parcial no debe borrar todos los resultados');
   console.log('search_alias_tests=ok');
 })().catch(error => {
   console.error(error.message);

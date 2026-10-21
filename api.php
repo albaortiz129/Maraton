@@ -73,6 +73,8 @@ function sendResetMail(string $recipient,string $token):bool { if(!smtpConfigure
 function serveTmdbImage(string $path):never {
   global $dir;
   userId();
+  // Image downloads must not serialize all other requests in this session.
+  session_write_close();
   if(!preg_match('~^/t/p/(w500|original)/([a-zA-Z0-9._-]+)$~',$path,$parts))out(['error'=>'Imagen no válida'],422);
   $cacheDir=$dir.DIRECTORY_SEPARATOR.'posters';
   if(!is_dir($cacheDir))mkdir($cacheDir,0700,true);
